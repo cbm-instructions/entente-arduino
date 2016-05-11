@@ -1,0 +1,5 @@
+This Version works only with two sonic sensors 
+ - Ultrasonic Module HY-SRF05
+
+And uses the NewPing Libary for better performance
+ - http://playground.arduino.cc/Code/NewPing
