@@ -1,6 +1,6 @@
-This is snake for the arduino uno.
+###This is snake for the arduino uno.
 
-By default you need:
+#By default you need:
 
 	- 2 neoPixel Matrix
 	- 1 Thumb-Joystick
@@ -9,11 +9,11 @@ By default you need:
 	- 7 male to male wire for the matrix and thumb-joystick
 	
 
-All configuration can be changed and they are descibed in the snake.ino file on the top.
+#All configuration can be changed and they are descibed in the snake.ino file on the top.
 
 If you like to use an other controler, just change the get_input() function. 
 
-Features:
+###Features:
         - You could change all parameters like adding a new Matrix change colors or make the game faster
 	- You could use inputs from the joystick to init. some speacials like rainbow-mode ( active by default )
 		( by default the last 3 joystick positons will be saved ) 
@@ -21,10 +21,10 @@ Features:
 	- Printing all kind of messages 
 	- Snake could go diagonal 
 
-Known issues:
+###Known issues:
 	- Loading could be take longer. The messages take some time to be generatet. I am on it :)
 	- The red dods (apples) snake eats to get bigger are set absolute random and could be apear under snake.
 	- Rainbow-mode is not off after GAME OVER. 
 
 
-If you have any questions or suggestion feel free to send us a message.
+#If you have any questions or suggestion feel free to send us a message.
