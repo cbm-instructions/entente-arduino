@@ -1,7 +1,11 @@
+#define MAX_PROSSES_NUMBER 5
+#define LIGHT_INTENSETY 300
 
 int globalDelay = 20;
 int current_tick_time = millis();
 int last_tick_time = 0;
+
+// photocells to messure the laser light
 
 int photocellPinFan = A0;    // the cell and 10K pulldown are connected to a0
 int photocellReadingFan;     // the analog reading from the analog resistor divider
@@ -18,32 +22,33 @@ int photocellReadingHDD;
 int photocellPinGra = A4;    
 int photocellReadingGra;   
 
-// switch
-int switchReleayFan = 4;
-int switchReleayHDD = 12;
-int switchReleayArduino = 13;
+// relay switches
+int switchReleayFan = 4;  // ON with LOW
+int switchReleayHDD = 12; // ON with LOW
+int switchReleayArduino = 13; // ON with LOW
 
 // LEDs for signals
-int ledSignalCPU_1 = 7; // yellow
-int ledSignalCPU_2 = 8; // yellow
-int ledSignalRam = 2;   // yellow
+int ledSignalCPU_1 = 7; // yellow // OUT with LOW
+int ledSignalCPU_2 = 8; // yellow // OUT with LOW
+int ledSignalRam = 2;   // yellow // OUT with LOW
 
 // all lasers
-int laserPowerNet = 3;
-int laserPowerFan = 5;
-int laserPowerCPU = 6;
-int laserPowerRam = 9;
-int laserPowerHDD = 10;
-int laserPowerGra = 11;
+int laserPowerNetPin = 3;  // Netzteil ( PowerSupply ) is allways on by start up
+int laserPowerFanPin = 5;  // Fan
+int laserPowerCPUPin = 6;  // CPU
+int laserPowerRamPin = 9;  // Ram
+int laserPowerHDDPin = 10; // Hard Drive
+int laserPowerGraPin = 11; // Grafic card
 
-/* for switch case status
+/* for programm progress status
+  is Start up    = 0
   is Fan Reached = 1
   is CPU Reached = 2
   is Ram Reached = 3
   is HDD Reached = 4
   is Gra Reached = 5
 */
-int progress = 0;
+int progress_counter = 0;
 ///// // // // // //
 
 boolean pulseLaser = true;
@@ -54,9 +59,9 @@ boolean debug = false;
 
 void setup(void) {
   // We'll send debugging information via the Serial monitor
- // if(debug){ 
+  if(debug){ 
     Serial.begin(9600);  
-  //}
+  }
 
   pinMode( switchReleayFan, OUTPUT );
   pinMode( switchReleayHDD , OUTPUT );
@@ -66,12 +71,12 @@ void setup(void) {
   pinMode(ledSignalCPU_2,OUTPUT ); 
   pinMode(ledSignalRam,  OUTPUT ); 
    
-  pinMode(laserPowerNet , OUTPUT );
-  pinMode(laserPowerFan , OUTPUT );
-  pinMode(laserPowerCPU , OUTPUT );
-  pinMode(laserPowerRam , OUTPUT );
-  pinMode(laserPowerHDD , OUTPUT );
-  pinMode(laserPowerGra , OUTPUT );  
+  pinMode(laserPowerNetPin , OUTPUT );
+  pinMode(laserPowerFanPin , OUTPUT );
+  pinMode(laserPowerCPUPin , OUTPUT );
+  pinMode(laserPowerRamPin , OUTPUT );
+  pinMode(laserPowerHDDPin , OUTPUT );
+  pinMode(laserPowerGraPin , OUTPUT );  
 
   digitalWrite( ledSignalCPU_1 , LOW ); 
   digitalWrite( ledSignalCPU_2 , LOW ); 
@@ -81,148 +86,178 @@ void setup(void) {
   digitalWrite( switchReleayHDD , HIGH ); 
   digitalWrite( switchReleayArduino , HIGH ); 
   
- 
-    
+  // STARTUP CHECK
+  check_all_lasers();
+  check_relay_connection();     
 }
 
 void print_debug(){   
-    //erial.print(" Analog photocell reading = ");
-    //Serial.println(photocellReadingFan);     // the raw analog reading
+  
+    Serial.print(" Analog photocell reading FAN = ");
+    Serial.println(photocellReadingFan);   
+   
+    Serial.print(" Analog photocell reading CPU = ");
+    Serial.println(photocellReadingCPU);    
+    
+    Serial.print(" Analog photocell reading Ram = ");
+    Serial.println(photocellReadingRam);
+   
+    Serial.print(" Analog photocell reading HDD = ");
+    Serial.println(photocellReadingHDD);  
+    
+    Serial.print(" Analog photocell reading Gra = ");
+    Serial.println(photocellReadingGra);   
 
-    Serial.print(" Digital swicht = ");
-    Serial.println(progress);   
-    
-    
+    Serial.print(" Programm-progress_counter = ");
+    Serial.println(progress_counter);           
 }
 
 // first
 void check_input(int photocellRead,  int laserPower){     
-    
-     delay(laserPulseDelay);     
   
-    
-      if (photocellRead < 300) {         
-        progress++;                
-      } 
-      
-      
-    //  progress %= 5;
-       
+  
+  //  CURRENT TEST SIDE
+     analogWrite(laserPower, 175);      
+     delay(laserPulseDelay);    
+     analogWrite(laserPower, 80);      
+     delay(laserPulseDelay);    
+ /// 
+ 
+      if (photocellRead < LIGHT_INTENSETY ){    
+   
+          if(progress_counter > MAX_PROSSES_NUMBER){
+        
+            progress_counter = MAX_PROSSES_NUMBER;
+        
+          }else{   
+            progress_counter++;   
+          }             
+      }    
 }
 
 void loop(void) {
-  
-  if(debug){check_all_lasers();}
-  
+        
+  if(debug){print_debug();}      
+    
   photocellReadingFan = analogRead( photocellPinFan );  
   photocellReadingCPU = analogRead( photocellPinCPU ); 
   photocellReadingRam = analogRead( photocellPinRam ); 
   photocellReadingHDD = analogRead( photocellPinHDD ); 
   photocellReadingGra = analogRead( photocellPinGra );
-
    
    if( ( current_tick_time - last_tick_time ) >= laserPulseDelay ){  
-     
-   
-           if(progress == 4){
-              check_input(photocellReadingGra, laserPowerGra);}
-            
-           if(progress == 3){
-              check_input(photocellReadingHDD, laserPowerHDD);}
-             
-            if(progress == 2){
-              check_input(photocellReadingRam, laserPowerRam);}
-             
-            if(progress == 1){
-                check_input(photocellReadingCPU, laserPowerCPU);}
-             
-            if(progress == 0){
-              check_input(photocellReadingFan, laserPowerFan);}
-             
+       
+     check_state_increase_prosses_count();
+     set_components_to_progress_counter_level();
   
-   last_tick_time = current_tick_time;   
+     last_tick_time = current_tick_time;   
   }
-        
-  /*
-  if (photocellReadingFan < 300) { 
-    //  digitalWrite( switchReleayHDD , LOW );
-  } 
-  else{  
-     digitalWrite( switchReleayHDD , HIGH );  
-  }   
- */
-      
-  if(debug){
-     print_debug();
-  }  
-    
+
   current_tick_time = millis();
   
   delay( globalDelay );
-    digitalWrite(  switchReleayArduino  , LOW );
-   // high is out
-  digitalWrite( laserPowerNet , LOW );
   
-  if(progress == 0){
-       digitalWrite( laserPowerFan , HIGH ); 
+   // ALLWAYS ON AFTER START UP
+    digitalWrite(  switchReleayArduino  , LOW ); 
+    digitalWrite( laserPowerNetPin , LOW );        
+}
+
+void check_state_increase_prosses_count(){
+  
+           if(progress_counter == 4){
+              check_input(photocellReadingGra, laserPowerGraPin);}
+            
+           if(progress_counter == 3){
+              check_input(photocellReadingHDD, laserPowerHDDPin);}
+             
+            if(progress_counter == 2){
+              check_input(photocellReadingRam, laserPowerRamPin);}
+             
+            if(progress_counter == 1){
+                check_input(photocellReadingCPU, laserPowerCPUPin);}
+             
+            if(progress_counter == 0){
+              check_input(photocellReadingFan, laserPowerFanPin);}    
+}
+
+void  set_components_to_progress_counter_level(){
+  
+   if(progress_counter == 0){
+       digitalWrite( laserPowerFanPin , HIGH ); 
        digitalWrite( switchReleayFan , HIGH );     
       }
   else{ 
-      digitalWrite( laserPowerFan , LOW );
+      digitalWrite( laserPowerFanPin , LOW );
       digitalWrite( switchReleayFan , LOW );
     }
     
-  if(progress <= 1){  
-      digitalWrite( laserPowerCPU , HIGH );
+  if(progress_counter <= 1){  
+      digitalWrite( laserPowerCPUPin , HIGH );
       digitalWrite( ledSignalCPU_1 , LOW ); 
       digitalWrite( ledSignalCPU_2 , LOW );  
     }
   else { 
-      digitalWrite( laserPowerCPU , LOW ); 
+      digitalWrite( laserPowerCPUPin , LOW ); 
       digitalWrite( ledSignalCPU_1 , HIGH ); 
       digitalWrite( ledSignalCPU_2 , HIGH); 
     }     
     
-  if(progress <= 2){
+  if(progress_counter <= 2){
       digitalWrite( ledSignalRam , LOW ); 
-      digitalWrite( laserPowerRam , HIGH );      
+      digitalWrite( laserPowerRamPin , HIGH );      
   }
   else { 
       digitalWrite( ledSignalRam , HIGH ); 
-      digitalWrite( laserPowerRam , LOW );    
+      digitalWrite( laserPowerRamPin , LOW );    
   }           
   
-  if(progress <= 3){    
+  if(progress_counter <= 3){    
        digitalWrite( switchReleayHDD , HIGH );  
-       digitalWrite( laserPowerHDD , HIGH );}
+       digitalWrite( laserPowerHDDPin , HIGH );}
   else {
         digitalWrite( switchReleayHDD , LOW ); 
-       digitalWrite( laserPowerHDD , LOW );       
+       digitalWrite( laserPowerHDDPin , LOW );       
       }     
   
-  if(progress <= 4){
-      digitalWrite( laserPowerGra , HIGH );
+  if(progress_counter <= 4){
+      digitalWrite( laserPowerGraPin , HIGH );
        digitalWrite(  switchReleayArduino  , HIGH ); } 
   else {
-       digitalWrite( laserPowerGra , LOW );
+       digitalWrite( laserPowerGraPin , LOW );
        digitalWrite(  switchReleayArduino  , LOW );
      }   
-       
 }
+// the following function are to check all components 
+// for the first start
 
 void check_all_lasers(){
    delay( 500);
-  digitalWrite( laserPowerNet , HIGH );
+  digitalWrite( laserPowerNetPin , HIGH );
    delay( 500);
-  digitalWrite( laserPowerFan , HIGH );
+  digitalWrite(  laserPowerFanPin, HIGH );
    delay( 500);
-  digitalWrite( laserPowerCPU , HIGH );
+  digitalWrite( laserPowerCPUPin , HIGH );
    delay( 500);
-  digitalWrite( laserPowerRam , HIGH );
+  digitalWrite( laserPowerRamPin , HIGH );
    delay( 500);
-  digitalWrite( laserPowerHDD , HIGH );
+  digitalWrite( laserPowerHDDPin , HIGH );
    delay( 500);
-  digitalWrite( laserPowerGra , HIGH );   
+  digitalWrite( laserPowerGraPin , HIGH );   
+}
+
+void check_relay_connection(){
+   // turn second arduino ON and after 1 second OFF again
+   digitalWrite(  switchReleayArduino  , LOW );
+   delay( 1000);
+   digitalWrite(  switchReleayArduino  , HIGH );
+   
+   digitalWrite(  switchReleayFan  , LOW );
+   delay( 1000);
+   digitalWrite(  switchReleayFan  , HIGH );
+   
+   digitalWrite(  switchReleayHDD  , LOW );
+   delay( 1000);
+   digitalWrite(  switchReleayHDD  , HIGH );
 }
 
 
