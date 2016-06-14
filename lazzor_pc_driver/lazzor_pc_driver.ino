@@ -4,7 +4,7 @@
 #define MIN_LASER_PULS_VALUE 150
 #define MAX_LASER_PULS_VALUE 255
 #define TICK_TIME 375
-#define GLOBAL_DELAY 50
+#define GLOBAL_DELAY 5
 
 
 int current_tick_time = millis();
@@ -55,11 +55,13 @@ boolean pulseLaser = false;
 int current_laser_puls_value = MIN_LASER_PULS_VALUE;
 int tick_time = TICK_TIME;
 
+int random_number = 0;
+
 
 void setup(void) {
   // We'll send debugging information via the Serial monitor
   if(debug){ 
-    Serial.begin(500);  
+    Serial.begin(1200);  
   }
 
   pinMode( switchReleayFan, OUTPUT );
@@ -90,11 +92,33 @@ void setup(void) {
  // check_relay_connection();     
 }
 
+boolean randTrueFalse(){
+  
+  random_number = random();
+  
+  if(random_number <= 0.5){
+   return true;     
+  }else{    
+   return false;   
+  }   
+}
+
 void print_debug(){   
   
     Serial.print(" Analog  Photore. = ");
-    Serial.println(photocellReading);      
-         
+    Serial.println(photocellReading);   
+    Serial.print(" isFanReached. = ");
+    Serial.println(isFanReached);   
+    Serial.print(" isCPUReached  = ");
+    Serial.println(isCPUReached );  
+    Serial.print(" isRamReached  = ");
+    Serial.println(isRamReached ); 
+    Serial.print(" isHDDReached  = ");
+    Serial.println(isHDDReached ); 
+    Serial.print(" isGraReached  = ");
+    Serial.println(isGraReached ); 
+
+
 }
 
 // first
@@ -109,12 +133,12 @@ boolean check_input(int photocellReadPin,  int laserPower){
   } 
    // to make after glow     
   analogWrite(laserPower, 150);
-  delay(40); 
+  delay(20); 
   analogWrite(laserPower, 120);
-  delay(30); 
+  delay(20); 
   analogWrite(laserPower, 100);
-  delay(25); 
-  analogWrite(laserPower, 80);
+  delay(10); 
+  analogWrite(laserPower, 70);
   delay(5); 
          
   return false;    
@@ -159,8 +183,9 @@ void  check_and_set_all_components(){
     
          digitalWrite( laserPowerFanPin , LOW); 
          digitalWrite( switchReleayFan , HIGH );    
-        // check photocell
-        isFanReached = check_input(photocellPinFan, laserPowerFanPin);           
+        // check photocell        
+        
+       isFanReached = check_input(photocellPinFan, laserPowerNetPin);           
       }
   else{  
       digitalWrite( laserPowerFanPin , HIGH);
@@ -169,33 +194,32 @@ void  check_and_set_all_components(){
    // Cheack CPU /////////////////////////////////////////////////////////     
   if(isCPUReached == false){  
       digitalWrite( laserPowerCPUPin , LOW );
-      digitalWrite( ledSignalCPU_1 , LOW ); 
-      digitalWrite( ledSignalCPU_2 , LOW );      
+      digitalWrite( ledSignalCPU_1 , HIGH ); 
+      digitalWrite( ledSignalCPU_2 , HIGH );      
     
     // check onlay if the previous is active
      if(isFanReached){
-      isCPUReached = check_input( photocellPinCPU , laserPowerCPUPin); 
+      isCPUReached = check_input( photocellPinCPU , laserPowerFanPin); 
      }   
      
     }
   else {     
       digitalWrite( laserPowerCPUPin , HIGH ); 
-      digitalWrite( ledSignalCPU_1 , HIGH ); 
-      digitalWrite( ledSignalCPU_2 , HIGH); 
+      randomCPUGlow();
     }     
   // Check RAM /////////////////////////////////////////////////////////
   if(isRamReached == false){
       digitalWrite( laserPowerRamPin , LOW );  
-      digitalWrite( ledSignalRam , LOW );     
+      digitalWrite( ledSignalRam , HIGH );     
       
      // check onlay if the previous is active
      if( isCPUReached ){
-      isRamReached =  check_input(photocellPinRam , laserPowerRamPin);
+      isRamReached =  check_input(photocellPinRam , laserPowerCPUPin);
      }      
   }
   else if( isCPUReached ){       
       digitalWrite( laserPowerRamPin , HIGH ); 
-      digitalWrite( ledSignalRam , HIGH );        
+      randomRamGlow();       
   }           
   
   // Cheack HDD /////////////////////////////////////////////////////////
@@ -204,11 +228,11 @@ void  check_and_set_all_components(){
        digitalWrite( laserPowerHDDPin , LOW );
       // check onlay if the previous is active
       if( isRamReached ){
-       isHDDReached =  check_input( photocellPinHDD  , laserPowerHDDPin);    
+       isHDDReached =  check_input( photocellPinHDD  , laserPowerRamPin);    
       }
     }
   else {
-        digitalWrite( switchReleayHDD , HIGH ); 
+        digitalWrite( switchReleayHDD ,LOW ); 
         digitalWrite( laserPowerHDDPin ,HIGH  );       
       }     
  // Cheack grafic card //////////////////////////////////////////////////
@@ -217,15 +241,62 @@ void  check_and_set_all_components(){
        digitalWrite(  switchReleayArduino  , HIGH ); 
        // check onlay if the previous is active
        if( isHDDReached ){
-         isGraReached = check_input(  photocellPinGra  , laserPowerGraPin);
+         isGraReached = check_input(  photocellPinGra  , laserPowerHDDPin);
        }      
      } 
   else {    
        digitalWrite( laserPowerGraPin , HIGH );
        digitalWrite(  switchReleayArduino  , LOW );
      }   
+     
+     
+    //final state
+        if( isGraReached ){
+           analogWrite(laserPowerHDDPin, 150);
+          delay(40); 
+          analogWrite(laserPowerHDDPin, 120);
+          delay(30); 
+          analogWrite(laserPowerHDDPin, 100);
+          delay(25); 
+          analogWrite(laserPowerHDDPin, 80);
+          delay(5); 
+       } 
        
 }
+
+void randomCPUGlow(){
+    
+      for(int i = 0; i < 20;i++){
+      if(randTrueFalse())
+        {
+          digitalWrite( ledSignalCPU_1 , LOW); 
+          digitalWrite( ledSignalCPU_2 , HIGH);
+        }else{
+          digitalWrite( ledSignalCPU_1 , HIGH); 
+          digitalWrite( ledSignalCPU_2 , LOW); 
+        }
+       delay(8); 
+      }
+      
+      digitalWrite( ledSignalCPU_2 , HIGH);     
+      digitalWrite( ledSignalCPU_1 , HIGH);   
+      
+}
+
+void randomRamGlow(){
+        for(int i = 0; i < 10;i++){
+      if(randTrueFalse())
+        {
+          digitalWrite( ledSignalRam , HIGH ); 
+        }else{    
+          digitalWrite( ledSignalRam , LOW); 
+        }
+       delay(8); 
+      }
+  
+   digitalWrite( ledSignalRam , LOW); 
+}
+
 // the following function are to check all components 
 // for the first start
 
