@@ -10,6 +10,8 @@
 int current_tick_time = millis();
 int last_tick_time = 0;
 
+
+
 // photocells to messure the laser light
 
 int photocellPinFan = A0;    // the cell and 10K pulldown are connected to a0
@@ -88,8 +90,11 @@ void setup(void) {
   digitalWrite( switchReleayArduino , LOW ); 
   
   // STARTUP CHECK
- // check_all_lasers();
- // check_relay_connection();     
+   check_all_lasers();
+   check_relay_connection();   
+   
+  // For maintanance 
+   check_photocell_with_laser(); 
 }
 
 boolean randTrueFalse(){
@@ -154,7 +159,7 @@ void set_all_laser_on(){
   digitalWrite( laserPowerGraPin , HIGH );   
   
 }
-
+// the main loop
 void loop(void) {
 
        current_tick_time = millis();   
@@ -163,7 +168,7 @@ void loop(void) {
            
           check_and_set_all_components();
       
-         last_tick_time = current_tick_time;   
+          last_tick_time = current_tick_time;   
       }
     
       if(debug){print_debug();}   
@@ -171,6 +176,9 @@ void loop(void) {
       delay( GLOBAL_DELAY );      
 }        
 
+// check if the LIGHT_INTENSETY of each diode 
+// if the current light intensetie is <= LIGHT_INTENSETY
+// active component and go to the next step
 void  check_and_set_all_components(){
 
   // allways active the laser from power supplie 
@@ -200,8 +208,7 @@ void  check_and_set_all_components(){
     // check onlay if the previous is active
      if(isFanReached){
       isCPUReached = check_input( photocellPinCPU , laserPowerFanPin); 
-     }   
-     
+     }        
     }
   else {     
       digitalWrite( laserPowerCPUPin , HIGH ); 
@@ -220,7 +227,7 @@ void  check_and_set_all_components(){
   else if( isCPUReached ){       
       digitalWrite( laserPowerRamPin , HIGH ); 
       randomRamGlow();       
-  }           
+  }         
   
   // Cheack HDD /////////////////////////////////////////////////////////
   if(isHDDReached == false){    
@@ -239,8 +246,9 @@ void  check_and_set_all_components(){
   if(isGraReached == false){
        digitalWrite( laserPowerGraPin , LOW );
        digitalWrite(  switchReleayArduino  , HIGH ); 
+       
        // check onlay if the previous is active
-       if( isHDDReached ){
+       if( isHDDReached && false ==  isGraReached ){
          isGraReached = check_input(  photocellPinGra  , laserPowerHDDPin);
        }      
      } 
@@ -250,7 +258,7 @@ void  check_and_set_all_components(){
      }   
      
      
-    //final state
+    //final state if thee grafic card is reached active it as the final state
         if( isGraReached ){
            analogWrite(laserPowerHDDPin, 150);
           delay(40); 
@@ -264,6 +272,7 @@ void  check_and_set_all_components(){
        
 }
 
+// make the CPU-LEDs lights blink random
 void randomCPUGlow(){
     
       for(int i = 0; i < 20;i++){
@@ -283,6 +292,7 @@ void randomCPUGlow(){
       
 }
 
+// make the Ram-LED glow randomly
 void randomRamGlow(){
         for(int i = 0; i < 10;i++){
       if(randTrueFalse())
@@ -315,6 +325,8 @@ void check_all_lasers(){
   digitalWrite( laserPowerGraPin , HIGH );   
 }
 
+// just check the lights on the releay 
+// or hear the sound
 void check_relay_connection(){
    // turn second arduino ON and after 1 second OFF again
    digitalWrite(  switchReleayArduino  , LOW );
@@ -328,6 +340,45 @@ void check_relay_connection(){
    digitalWrite(  switchReleayHDD  , LOW );
    delay( 1000);
    digitalWrite(  switchReleayHDD  , HIGH );
+}
+
+
+// just to check if all things work properbly
+// check each photodiode 
+// The user has to direct the laser to each diode by hand
+
+
+void check_photocell_with_laser(){
+ 
+  Serial.print("Starup check");   
+  delay( 1000);
+  
+  if( check_input(photocellPinFan ,laserPowerNetPin ) == false){
+     Serial.println(" ERROR photocell Fan"); 
+  }
+  
+   delay( 1000);   
+  if( check_input(photocellPinCPU ,  laserPowerCPUPin ) == false){
+     Serial.println(" ERROR photocell CPU"); 
+  }
+
+   delay( 1000);   
+  if( check_input(photocellPinRam , laserPowerRamPin) == false){
+     Serial.println(" ERROR photocell Ram"); 
+  }  
+
+   delay( 1000);        
+  if( check_input(photocellPinHDD , laserPowerHDDPin ) == false){
+     Serial.println(" ERROR photocell HDD"); 
+  }  
+  
+  delay( 1000);  
+   if( check_input(photocellPinHDD , laserPowerGraPin) == false){
+     Serial.println(" ERROR photocell HDD"); 
+  }  
+  
+  
+  
 }
 
 
