@@ -22,8 +22,6 @@ If you like to use an other controler, just change the get_input() function.
 
 ###Known issues:
 	- Loading could be take longer. The messages take some time to be generatet. 
-	- The red dods (apples) snake eats to get bigger are set absolute random and could be apear under snake.
-	- Rainbow-mode is not off after GAME OVER. 
 
 
 If you have any questions or suggestion feel free to send us a message.

@@ -1,4 +1,4 @@
-// Arduino Snake 0.4.0
+// Arduino Snake 1.0.0
 // CBM Project by the Universaty of applied Science Mannheim
 #include <Adafruit_GFX.h>
 #include <Adafruit_NeoMatrix.h>
@@ -19,7 +19,7 @@
 #define NUM_LEDS (NUM_LEDS_X * NUM_LEDS_Y)
 
 #define MATRIX_DATA_PIN 6
-#define JOYSTICK_SELECT_BUTTON_PIN 2
+#define JOYSTICK_SELECT_BUTTON_PIN 7
 
 #define JOYSTICK_X_AXIS A0
 #define JOYSTICK_Y_AXIS A1
@@ -119,6 +119,12 @@ uint32_t  tmp_color ;
 // just reduce it a bit 
  int last_print_time = millis();
  int print_tick_intervall = 80;
+ 
+ // just to try to set the apple the right way
+ 
+  int max_free_place_searche = 20;
+ 
+  boolean is_new_apple_position = true;
   
 
 void setup() {
@@ -222,7 +228,7 @@ void save_input(Side newState){
 void check_saved_input(){
    
 
-    if( saveLastInputs[0] == WEST && saveLastInputs[1] == EAST && saveLastInputs[2] == EAST){
+    if( saveLastInputs[0] == WEST && saveLastInputs[1] == SOUTH && saveLastInputs[2] == EAST){
       isRainbowMode = true;
     } 
     
@@ -362,8 +368,37 @@ void reset_Tail(){
 
 // sets the apple for the snake to eat... poor snake only apples as source to grow
 void set_new_random_apple_positon() {    
-  position_apple_x = random( 0 , NUM_LEDS_X );
-  position_apple_y = random( 0 , NUM_LEDS_Y );  
+  
+  // try to set random and fi  max_free_place_searche is reached, just set the apple 
+  // behinde snake
+  
+  for(int i = 0;i < max_free_place_searche;i++){
+    
+      position_apple_x = random( 0 , NUM_LEDS_X );
+      position_apple_y = random( 0 , NUM_LEDS_Y );
+    
+      is_new_apple_position = true;  
+    
+      for( int k =  1; k < snake_length;k++){     //   
+        if( position_apple_x == tail_position_x[k] &&   tail_position_y[k] == position_apple_y){     
+          is_new_apple_position = false;      
+        }         
+      } 
+  
+  
+      if(is_new_apple_position){break;}
+      
+      if(i  ==  ( max_free_place_searche -1)){
+       
+          position_apple_x = tail_position_x[snake_length-1];
+          position_apple_y = tail_position_y[snake_length-1];
+       
+      } 
+    
+  }
+
+  
+  
 }
 
 // just checks if the head of the snake (default green) has got an apple
@@ -584,6 +619,7 @@ void gameOver(){
   else { 
               
       sprintf(gameOverScoreConcatenation,"%s:%i",gameOverMessage,snake_length);
+       matrix.fillScreen(matrix.Color( 0,0,255 )); 
       print_message(gameOverScoreConcatenation);   
   }
 }
@@ -670,7 +706,7 @@ void loop() {
                     print_all();         
                 }                
             }else{
-              
+               matrix.fillScreen(matrix.Color( 0,0,255 ));
                print_message(introMessage);    
             }
         }
