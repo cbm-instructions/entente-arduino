@@ -53,9 +53,9 @@ boolean isHDDReached = false;
 boolean isGraReached = false;
 
 ///// // // // // //
-boolean all_laser_on = false;
 boolean debug = false;
-boolean pulseLaser = false;
+boolean isStartUpCheck = false;
+
 
 int current_laser_puls_value = MIN_LASER_PULS_VALUE;
 int tick_time = TICK_TIME;
@@ -84,9 +84,9 @@ void setup(void) {
   pinMode(laserPowerHDDPin , OUTPUT );
   pinMode(laserPowerGraPin , OUTPUT );  
 
-  digitalWrite( ledSignalCPU_1 , LOW ); 
-  digitalWrite( ledSignalCPU_2 , LOW ); 
-  digitalWrite( ledSignalRam , LOW ); 
+  digitalWrite( ledSignalCPU_1 , HIGH ); 
+  digitalWrite( ledSignalCPU_2 , HIGH ); 
+  digitalWrite( ledSignalRam , HIGH ); 
   
   digitalWrite( switchReleayFan , LOW );   
   digitalWrite( switchReleayHDD , LOW ); 
@@ -94,12 +94,14 @@ void setup(void) {
   
   digitalWrite( power_high, HIGH);
   
-  // STARTUP CHECK
-   check_all_lasers();
-   check_relay_connection();   
-   
-  // For maintanance 
-   check_photocell_with_laser(); 
+  
+  if(isStartUpCheck){
+    // STARTUP CHECK
+    check_all_lasers();
+    check_relay_connection();        
+    // For maintanance 
+    check_photocell_with_laser(); 
+  }
 }
 
 boolean randTrueFalse(){
@@ -166,7 +168,7 @@ void set_all_laser_on(){
 }
 // the main loop
 void loop(void) {
-
+     
        current_tick_time = millis();   
         
        if( ( current_tick_time - last_tick_time ) >= tick_time ){  
@@ -188,7 +190,7 @@ void  check_and_set_all_components(){
 
   // allways active the laser from power supplie 
   digitalWrite( laserPowerNetPin , HIGH );     
-  
+  digitalWrite( power_high, HIGH);
   // if FAN photocell is not reached check it and if the photocell is hit actiate next laser
   
   // Cheack Fan ///////////////////////////////////////////////////////// 
@@ -207,8 +209,8 @@ void  check_and_set_all_components(){
    // Cheack CPU /////////////////////////////////////////////////////////     
   if(isCPUReached == false){  
       digitalWrite( laserPowerCPUPin , LOW );
-      digitalWrite( ledSignalCPU_1 , HIGH ); 
-      digitalWrite( ledSignalCPU_2 , HIGH );      
+      digitalWrite( ledSignalCPU_1 , LOW ); 
+      digitalWrite( ledSignalCPU_2 , LOW );      
     
     // check onlay if the previous is active
      if(isFanReached){
@@ -222,7 +224,7 @@ void  check_and_set_all_components(){
   // Check RAM /////////////////////////////////////////////////////////
   if(isRamReached == false){
       digitalWrite( laserPowerRamPin , LOW );  
-      digitalWrite( ledSignalRam , HIGH );     
+      digitalWrite( ledSignalRam , LOW );     
       
      // check onlay if the previous is active
      if( isCPUReached ){
