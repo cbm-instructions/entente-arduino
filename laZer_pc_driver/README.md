@@ -1,4 +1,4 @@
-###Driver for lazzor pc
+###Driver for laZer computer
 
 This is the basic control of the laser-pc.
 The first laser is allways active if the arduino itself is active.
@@ -9,10 +9,7 @@ After that the second arduino will switch on and the user could enjoy a small ga
 -entente-arduino we just like laser.
 
 
-## TODO
 
-- laser with pwm to make it glow smooth
-- a delay time after hitting a resistor -> after glow
 
 
 
