@@ -210,8 +210,6 @@ Für den Arduino der Steuerung haben wir eine Platine geätzt und für den Ardui
 
 <img src="pictures/07.jpg" width="500">
 <img src="pictures/08.jpg" width="500">
-<img src="pictures/13.jpg" width="500">
-
 ###Schritt 5 - Code
 Code für Arduino herunterladen und auf die zwei Arduinos laden
 * laZer_pc_driver für die Steuerung der Laser, Wiederstände und Komponenten
