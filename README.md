@@ -1,4 +1,4 @@
-# Entente Arduino - LaZor Computer
+# Entente Arduino - LaZer Computer
 <img src="pictures/01.jpg" width="500">
 ##  Einleitung
 Unser Projekt für das Fach "Challenge Based Making" - der "LaZer Computer".
