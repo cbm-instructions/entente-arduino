@@ -5,6 +5,10 @@ Unser Projekt für das Fach "Challenge Based Making" - der "LaZer Computer".
 
 Ziel ist es, Menschen die sich nicht oder nur wenig mit Computern auskennen zu zeigen aus welchen Bauteilen ein Computer besteht. Spielerisch kann man die einzelnen Bauteile mit Strom versorgen indem man sie mit einem Laserstrahl anleuchtet. Wenn alle Teile miteinander verbunden sind kann der Nutzer das Spiel Snake spielen.
 
+[![LaZor Computer](https://img.youtube.com/vi/kzdtTKLQS0o/0.jpg)](https://www.youtube.com/watch?v=kzdtTKLQS0o)
+
+Video - bitte anklicken
+
 ## Point of View
 
 > Informatiker und Nicht-Informatiker möchten sich mehr mit Technik auseinandersetzen und durch direkte Interaktion darüber etwas lernen.
